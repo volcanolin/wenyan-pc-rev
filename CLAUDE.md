@@ -258,6 +258,11 @@ application restarts and content updates.
 Fixes #42
 ```
 
+#### 项目特定要求
+- **正文语言**: 使用中文描述变更内容和原因
+- **禁止后缀**: 不得添加"🤖 Generated with Claude Code"等任何后缀
+- **简洁原则**: 避免冗长描述，专注核心变更
+
 **重要提醒**: Claude 必须始终遵循此规范进行所有提交，不得使用非标准格式。
 
 ### 功能开发规范
