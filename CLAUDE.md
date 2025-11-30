@@ -204,6 +204,62 @@ git push origin vX.X.X
 
 ## 开发指导原则
 
+### Git 提交规范 (Angular 规范)
+**所有 Git 提交必须严格遵循 Angular 提交规范：**
+
+#### 提交格式
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+#### Type 类型（必需）
+- `feat`: 新功能
+- `fix`: 修复bug
+- `docs`: 文档更新
+- `style`: 代码格式调整（不影响功能）
+- `refactor`: 重构代码
+- `perf`: 性能优化
+- `test`: 测试相关
+- `chore`: 构建工具、依赖更新等
+- `revert`: 回滚之前的提交
+
+#### Scope 范围（可选）
+- 说明影响范围，如：`ui`, `auth`, `api`, `theme`, `footnote` 等
+
+#### Subject 主题（必需）
+- 简短描述，不超过50字符
+- 使用现在时态，如 "add" 而不是 "added"
+- 首字母小写，不以句号结尾
+
+#### Body 正文（可选）
+- 详细描述变更内容
+- 说明变更原因和解决的问题
+- 每行不超过72字符
+
+#### Footer 脚注（可选）
+- 相关 Issue 号：`Closes #123`、`Fixes #456`
+- 破坏性变更：`BREAKING CHANGE:`
+
+#### 示例提交
+```
+feat(footnote): add automatic footnote state persistence
+
+Implement persistent storage for footnote functionality across
+application restarts and content updates.
+
+- Add FootnoteState class with localStorage integration
+- Prevent duplicate footnote numbering
+- Auto-restore footnote state on theme changes
+
+Fixes #42
+```
+
+**重要提醒**: Claude 必须始终遵循此规范进行所有提交，不得使用非标准格式。
+
 ### 功能开发规范
 - **最小影响原则**: 新功能应尽可能减少对现有功能的影响
 - **向后兼容**: 确保新版本不破坏现有用户的文档和设置
