@@ -1,5 +1,5 @@
 <div align="center">
-    <img alt="logo" src="data/256-mac.png" />
+    <img alt="logo" src="https://img.autorun.icu/file/1765298577192_256x256.png" />
 </div>
 
 # 文颜-rev (WenYan-rev) - 增强版
@@ -140,7 +140,7 @@
 
 如果您认可本增强版的改进，也可以请我喝一杯咖啡~
 
-![](data/wx.png) ![](data/zfb.png)
+![wx.png](https://img.autorun.icu/file/1765256160897_wx.png) ![zfb.png](https://img.autorun.icu/file/1765256161114_zfb.png)
 
 ## 📄 许可证
 
