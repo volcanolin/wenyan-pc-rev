@@ -1,11 +1,12 @@
 {
   "name": "wenyan-rev",
   "private": true,
-  "version": "2.5.0",
+  "version": "2.5.1",
   "type": "module",
   "scripts": {
-    "tauri-dev": "tauri dev",
-    "tauri": "tauri build"
+    "copy-readme": "node scripts/copy-welcome.js",
+    "tauri-dev": "npm run copy-readme && tauri dev",
+    "tauri": "npm run copy-readme && tauri build"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.6.2"

@@ -191,7 +191,7 @@ async function load() {
             
             let lastArticle = localStorage.getItem('lastArticle');
             if (!lastArticle) {
-                const resourcePath = await resolveResource('resources/example.md');
+                const resourcePath = await resolveResource('resources/README.md');
                 lastArticle = await readTextFile(resourcePath);
             }
             content = lastArticle;
