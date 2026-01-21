@@ -217,15 +217,15 @@ body {
     }
 }
 
-#about-btn {
+.dropdown-link {
     color: #000;
 }
 
-#about-btn:hover {
+.dropdown-link:hover {
     color: #000;
 }
 
-#about-btn:active {
+.dropdown-link:active {
     color: #000;
 }
 
@@ -278,8 +278,15 @@ pre, pre code, code {
     line-height: 1.5;
 }
 
-/* 图例相关样式 - 完全固定，不允许主题修改 */
-.image-caption {
+/*
+ * 图例样式 - 使用 !important 确保样式不被主题覆盖
+ * 这是有意为之的设计决策，因为：
+ * 1. 图例需要在所有主题下保持一致的外观
+ * 2. 复制到微信公众号等平台时需要保持样式
+ * 3. 用户期望图例有统一的视觉效果
+ */
+#wenyan .image-caption,
+section#wenyan span.image-caption {
     display: block !important;
     text-align: center !important;
     font-size: 0.9em !important;

@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.5.2] - 2025-01-22 (代码质量优化版本)
+
+### 🔧 代码重构
+- **状态同步函数重构**: 抽象出通用的 `syncFeatureButtonState()` 函数，统一管理功能按钮状态
+- **长函数拆分**: 将 `loadCustomThemes` 拆分为5个独立的渲染函数，提高代码可维护性
+- **魔法数字常量化**: 定义 `TIMING` 常量对象替代硬编码数字，增强代码可读性
+
+### 🐛 修复
+- **HTML ID重复**: 修复 `index.html` 中重复的元素 ID 问题
+- **函数命名拼写错误**: `onPeviewModeChange` → `onPreviewModeChange`
+- **localStorage key不一致**: 统一脚注状态 localStorage key，解决状态同步不一致问题
+
+### ⚡ 优化
+- **移除调试日志**: 清理生产环境不必要的 console.log/warn 语句
+- **脚本加载优化**: 为脚本标签添加 defer 属性，优化页面加载性能
+- **Rust错误处理改进**: 将 `unwrap()` 改为 `if let Err(e)` + `expect()`，避免潜在崩溃
+- **字体本地化**: 本地化 JetBrains Mono 字体，添加 CDN 回退机制支持离线使用
+- **CSS选择器优化**: 提高 `.image-caption` 选择器优先级，增强样式可靠性
+
+### 📦 依赖优化
+- 将 `@playwright/test` 移至 devDependencies
+- 移除未使用的 `@tauri-apps/plugin-store` 依赖
+
+---
+
 ## [2.5.1] - 2025-12-12 (启动内容优化版本)
 
 ### 🆕 新增功能

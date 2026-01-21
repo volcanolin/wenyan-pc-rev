@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="micromodal/micromodal.css">
-    <link href="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jetbrains-mono/1.0.6/web/jetbrains-mono.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="fonts/fonts.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文颜-rev</title>
-    <script src="html2canvas/html2canvas.min.js"></script>
-    <script src="main.js"></script>
-    <script src="micromodal/micromodal.min.js"></script>
+    <script defer src="html2canvas/html2canvas.min.js"></script>
+    <script defer src="main.js"></script>
+    <script defer src="micromodal/micromodal.min.js"></script>
 </head>
 
 <body>
@@ -75,7 +75,7 @@
                     </svg>
                     字体
                 </button>
-                <button class="overlay-button" onclick="onPeviewModeChange(this);">
+                <button class="overlay-button" onclick="onPreviewModeChange(this);">
                     <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <use href="#desktopIcon"></use>
                     </svg>
@@ -112,11 +112,11 @@
             </ul>
         </div>
         <div id="dropdown" class="dropdown-content">
-            <a href="#" id="about-btn" class="dropdown-link" onclick="openMarkdownFile()">打开文件...</a>
-            <a href="#" id="about-btn" class="dropdown-link" onclick="openAbout()">关于</a>
+            <a href="#" id="dropdown-open-file-btn" class="dropdown-link" onclick="openMarkdownFile()">打开文件...</a>
+            <a href="#" id="dropdown-about-btn" class="dropdown-link" onclick="openAbout()">关于</a>
         </div>
         <div id="mainMenu" class="main-menu">
-            <a href="#" id="about-btn" class="dropdown-link" onclick="openMarkdownFile()">打开文件...</a>
+            <a href="#" id="main-menu-open-file-btn" class="dropdown-link" onclick="openMarkdownFile()">打开文件...</a>
         </div>
         <svg style="display: none;">
             <symbol id="desktopIcon" viewBox="0 0 48 48">

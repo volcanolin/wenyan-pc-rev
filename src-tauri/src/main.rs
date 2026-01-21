@@ -7,30 +7,34 @@ use tauri::Manager;
 #[tauri::command]
 fn write_html_to_clipboard(app: tauri::AppHandle, text: String) {
     let clipboard = app.state::<tauri_plugin_clipboard::ClipboardManager>();
-    clipboard.write_html(text).unwrap();
+    if let Err(e) = clipboard.write_html(text) {
+        eprintln!("Failed to write HTML to clipboard: {}", e);
+    }
 }
 
 #[tauri::command]
 fn write_text_to_clipboard(app: tauri::AppHandle, text: String) {
     let clipboard = app.state::<tauri_plugin_clipboard::ClipboardManager>();
-    clipboard.write_text(text).unwrap();
+    if let Err(e) = clipboard.write_text(text) {
+        eprintln!("Failed to write text to clipboard: {}", e);
+    }
 }
 
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let main_window = app.get_window("main").unwrap();
-        
+            let main_window = app.get_window("main").expect("Failed to get main window");
+
             // 获取线程安全的 AppHandle
             let app_handle = app.handle();
-    
+
             main_window.listen("open-about", move |_| {
                 // 检查是否已经存在 ID 为 "about" 的窗口
                 if app_handle.get_window("about").is_none() {
-                    tauri::WindowBuilder::new(
-                        &app_handle, // 使用线程安全的 app_handle
-                        "about",     // 新窗口的 id
-                        tauri::WindowUrl::App("about.html".into()) // 指定关于页面的路径
+                    if let Err(e) = tauri::WindowBuilder::new(
+                        &app_handle,                                // 使用线程安全的 app_handle
+                        "about",                                    // 新窗口的 id
+                        tauri::WindowUrl::App("about.html".into()), // 指定关于页面的路径
                     )
                     .title("关于 文颜-rev")
                     .inner_size(500.0, 350.0)
@@ -39,15 +43,19 @@ fn main() {
                     .maximizable(false) // 禁用最大化按钮
                     .center() // 将窗口居中显示
                     .build()
-                    .unwrap();
+                    {
+                        eprintln!("Failed to create about window: {}", e);
+                    }
                 }
             });
             Ok(())
         })
         .plugin(tauri_plugin_clipboard::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
-        // .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![write_html_to_clipboard, write_text_to_clipboard])
+        .invoke_handler(tauri::generate_handler![
+            write_html_to_clipboard,
+            write_text_to_clipboard
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

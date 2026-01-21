@@ -1,13 +1,23 @@
+/* JetBrains Mono 字体 - 本地化字体文件 */
+/* 如需使用本地字体，请下载 woff2 文件到此目录 */
+/* 下载地址: https://github.com/JetBrains/JetBrainsMono/releases */
+
 @font-face {
     font-family: 'JetBrains Mono';
-    src: url('./JetBrainsMono-Regular.woff2') format('woff2');
+    src: local('JetBrains Mono'),
+         url('./JetBrainsMono-Regular.woff2') format('woff2'),
+         url('https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jetbrains-mono/1.0.6/web/woff2/JetBrainsMono-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'JetBrains Mono';
-    src: url('./JetBrainsMono-Bold.woff2') format('woff2');
+    src: local('JetBrains Mono Bold'),
+         url('./JetBrainsMono-Bold.woff2') format('woff2'),
+         url('https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jetbrains-mono/1.0.6/web/woff2/JetBrainsMono-Bold.woff2') format('woff2');
     font-weight: 700;
     font-style: normal;
-} 
+    font-display: swap;
+}

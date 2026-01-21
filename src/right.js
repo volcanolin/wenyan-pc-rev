@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+// 常量定义
+const TIMING = {
+    DOM_UPDATE_DELAY: 50,      // DOM 更新后的延迟时间
+    FONT_APPLY_DELAY: 10,      // 字体应用延迟时间
+    THEME_SWITCH_DELAY: 50     // 主题切换后的延迟时间
+};
+
 const {markedHighlight} = globalThis.markedHighlight;
 let postprocessMarkdown = "";
 let isScrollingFromScript = false;
@@ -23,7 +30,7 @@ let isCaptionEnabled = false;
 
 // 脚注状态管理 (v2.4.10+)
 const FootnoteState = {
-    STORAGE_KEY: 'wenyan_footnotes_enabled',
+    STORAGE_KEY: 'footnotesEnabled',
 
     // 获取脚注启用状态
     isEnabled() {
@@ -180,14 +187,14 @@ function refreshContentWithFont(content) {
     if (FootnoteState.isEnabled()) {
         setTimeout(() => {
             addFootnotes();
-        }, 50); // 延迟确保DOM完全更新
+        }, TIMING.DOM_UPDATE_DELAY); // 延迟确保DOM完全更新
     }
 
     // 重新应用字体设置
     if (fontFamily) {
         setTimeout(() => {
             FontManager.applyToPreview(fontFamily);
-        }, 10); // 短暂延迟确保DOM已更新
+        }, TIMING.FONT_APPLY_DELAY); // 短暂延迟确保DOM已更新
     }
 }
 function setPreviewMode(mode) {
@@ -794,7 +801,7 @@ function resetFootnoteStylesForNewTheme() {
         // 延迟重新添加脚注，确保新样式已加载
         setTimeout(() => {
             addFootnotes(listStyle);
-        }, 50);
+        }, TIMING.THEME_SWITCH_DELAY);
     }
 }
 
@@ -1053,7 +1060,7 @@ const EventHandler = {
                         FontManager.applyToPreview(fontFamily);
                     }
                 }
-            }, 50); // 短暂延迟确保DOM更新完成
+            }, TIMING.DOM_UPDATE_DELAY); // 短暂延迟确保DOM更新完成
         },
         'onContentChange': function(data) {
             setContent(data.content);
@@ -1075,9 +1082,9 @@ const EventHandler = {
                 if (FootnoteState.isEnabled()) {
                     addFootnotes();
                 }
-            }, 50); // 短暂延迟确保DOM更新完成
+            }, TIMING.DOM_UPDATE_DELAY); // 短暂延迟确保DOM更新完成
         },
-        'onPeviewModeChange': function(data) {
+        'onPreviewModeChange': function(data) {
             setPreviewMode(data.previewMode);
         },
         'onFootnoteChange': function(data) {

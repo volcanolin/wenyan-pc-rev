@@ -1,7 +1,7 @@
 {
   "name": "wenyan-rev",
   "private": true,
-  "version": "2.5.1",
+  "version": "2.5.2",
   "type": "module",
   "scripts": {
     "copy-readme": "node scripts/copy-welcome.js",
@@ -9,12 +9,11 @@
     "tauri": "npm run copy-readme && tauri build"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@tauri-apps/cli": "^1.6.2"
   },
   "dependencies": {
-    "@playwright/test": "^1.55.0",
     "@tauri-apps/api": "^1.6.0",
-    "@tauri-apps/plugin-store": "^2.0.0-rc.1",
     "tauri-plugin-clipboard-api": "^1.1.4"
   }
 }

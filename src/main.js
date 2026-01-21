@@ -75,6 +75,12 @@ const highlightThemes = [
     { id: 'monokai', name: 'Monokai' }
 ];
 
+// 常量定义
+const TIMING = {
+    STATE_SYNC_DELAY: 100,     // 状态同步后的延迟时间
+    LOAD_COMPLETE_DELAY: 150   // 加载完成后的延迟时间
+};
+
 let selectedTheme = 'gzh_default';
 let highlightStyle = 'highlight/styles/github.min.css';
 let previewMode = 'style.css';
@@ -125,8 +131,6 @@ function addFontSelector() {
     if (fontFamily) {
         updatePreviewFont(fontFamily);
     }
-
-    console.log('Font selector initialized with:', currentFont);
 }
 
 window.addEventListener('message', async (event) => {
@@ -245,7 +249,7 @@ async function load() {
 
                 // 更新预览（确保在状态同步后再调用）
                 onUpdate();
-            }, 150);
+            }, TIMING.LOAD_COMPLETE_DELAY);
 
         } catch (error) {
             console.error('Error reading file:', error);
@@ -286,7 +290,7 @@ async function onContentChange() {
     }
 }
 
-async function onPeviewModeChange(button) {
+async function onPreviewModeChange(button) {
     const useElement = button.querySelector('use');
     if (previewMode === 'style.css') {
         previewMode = 'desktop_style.css';
@@ -298,7 +302,7 @@ async function onPeviewModeChange(button) {
     const iframe = document.getElementById('rightFrame');
     if (iframe) {
         const message = {
-            type: 'onPeviewModeChange',
+            type: 'onPreviewModeChange',
             previewMode: previewMode
         };
         iframe.contentWindow.postMessage(message, '*');
@@ -382,96 +386,71 @@ async function changePlatform(selectedPlatform) {
 }
 
 /**
- * 根据保存的图例功能状态同步按钮颜色
- * 直接从localStorage读取图例功能开关状态，确保按钮状态与功能状态一致
+ * 通用的功能按钮状态同步函数
+ * @param {Object} options - 配置选项
+ * @param {string} options.storageKey - localStorage 存储键名
+ * @param {string} options.buttonSelector - 按钮选择器
+ * @param {function} options.getGlobalState - 获取全局状态的函数
+ * @param {function} options.setGlobalState - 设置全局状态的函数
  */
-function syncCaptionButtonState() {
+function syncFeatureButtonState(options) {
+    const { storageKey, buttonSelector, getGlobalState, setGlobalState } = options;
     try {
-        // 直接从localStorage读取图例功能状态
-        const savedState = localStorage.getItem('captionEnabled') === 'true';
+        const savedState = localStorage.getItem(storageKey) === 'true';
 
         // 同步按钮状态
-        const captionButtons = document.querySelectorAll('button[onclick*="onCaptionChange"]');
-        if (captionButtons.length > 0) {
-            const button = captionButtons[0];
+        const buttons = document.querySelectorAll(buttonSelector);
+        if (buttons.length > 0) {
+            const button = buttons[0];
             if (savedState) {
-                // 图例功能开启 → 按钮蓝色
                 button.style.backgroundColor = '#007AFF';
                 button.style.color = 'white';
             } else {
-                // 图例功能关闭 → 按钮透明
                 button.style.backgroundColor = '';
                 button.style.color = '';
             }
         }
 
         // 更新全局状态变量
-        const previousState = isCaptionEnabled;
-        isCaptionEnabled = savedState;
-        console.log('图例功能状态已同步:', savedState); // 调试日志
+        const previousState = getGlobalState();
+        setGlobalState(savedState);
 
-        // 🔥 关键修复：如果状态发生变化，主动触发内容更新
+        // 如果状态发生变化，主动触发内容更新
         if (previousState !== savedState) {
-            console.log('检测到图例状态变化，触发内容重新渲染'); // 调试日志
-            // 延迟执行，确保按钮状态更新完成
             setTimeout(() => {
                 onUpdate();
-            }, 100);
+            }, TIMING.STATE_SYNC_DELAY);
         }
     } catch (error) {
-        console.warn('同步图例按钮状态失败:', error);
-        // 出错时默认关闭图例功能
-        isCaptionEnabled = false;
-        localStorage.setItem('captionEnabled', 'false');
-        console.log('图例功能状态已重置为默认值:', false); // 调试日志
+        setGlobalState(false);
+        localStorage.setItem(storageKey, 'false');
     }
 }
 
 /**
+ * 根据保存的图例功能状态同步按钮颜色
+ */
+function syncCaptionButtonState() {
+    syncFeatureButtonState({
+        storageKey: 'captionEnabled',
+        buttonSelector: 'button[onclick*="onCaptionChange"]',
+        getGlobalState: () => isCaptionEnabled,
+        setGlobalState: (val) => { isCaptionEnabled = val; }
+    });
+}
+
+/**
  * 根据保存的脚注功能状态同步按钮颜色
- * 直接从localStorage读取脚注功能开关状态，确保按钮状态与功能状态一致
  */
 function syncFootnoteButtonState() {
-    try {
-        // 直接从localStorage读取脚注功能状态
-        const savedState = localStorage.getItem('footnotesEnabled') === 'true';
-
-        // 同步按钮状态
-        const footnoteButtons = document.querySelectorAll('button[onclick*="onFootnoteChange"]');
-        if (footnoteButtons.length > 0) {
-            const button = footnoteButtons[0];
-            if (savedState) {
-                // 脚注功能开启 → 按钮蓝色
-                button.style.backgroundColor = '#007AFF';
-                button.style.color = 'white';
-            } else {
-                // 脚注功能关闭 → 按钮透明
-                button.style.backgroundColor = '';
-                button.style.color = '';
-            }
-        }
-
-        // 更新全局状态变量
-        const previousState = isFootnotes;
-        isFootnotes = savedState;
-        console.log('脚注功能状态已同步:', savedState); // 调试日志
-
-        // 🔥 关键修复：如果状态发生变化，主动触发内容更新
-        if (previousState !== savedState) {
-            console.log('检测到脚注状态变化，触发内容重新渲染'); // 调试日志
-            // 延迟执行，确保按钮状态更新完成
-            setTimeout(() => {
-                onUpdate();
-            }, 100);
-        }
-    } catch (error) {
-        console.warn('同步脚注按钮状态失败:', error);
-        // 出错时默认关闭脚注功能
-        isFootnotes = false;
-        localStorage.setItem('footnotesEnabled', 'false');
-        console.log('脚注功能状态已重置为默认值:', false); // 调试日志
-    }
+    syncFeatureButtonState({
+        storageKey: 'footnotesEnabled',
+        buttonSelector: 'button[onclick*="onFootnoteChange"]',
+        getGlobalState: () => isFootnotes,
+        setGlobalState: (val) => { isFootnotes = val; }
+    });
 }
+
 
 async function onCopy(button) {
     const iframe = document.getElementById('rightFrame');
@@ -695,24 +674,173 @@ async function showCssEditor(customTheme) {
     hideThemeOverlay();
 }
 
+/**
+ * 渲染内置主题列表
+ * @param {HTMLElement} ul - 主题列表容器
+ */
+function renderBuiltinThemes(ul) {
+    builtinThemes.forEach((i) => {
+        const li = document.createElement('li');
+        li.setAttribute('id', i.id);
+        const span1 = document.createElement('span');
+        span1.innerHTML = i.name;
+        const span2 = document.createElement('span');
+        span2.innerHTML = i.author;
+        li.style.display = 'flex';
+        li.style.alignItems = 'center';
+        li.appendChild(span1);
+        li.appendChild(span2);
+        ul.appendChild(li);
+    });
+}
+
+/**
+ * 渲染自定义主题列表
+ * @param {HTMLElement} ul - 主题列表容器
+ * @param {Array} customThemes - 自定义主题数据
+ */
+function renderCustomThemes(ul, customThemes) {
+    if (!customThemes || customThemes.length === 0) return;
+
+    // 添加自定义主题分隔符
+    const customSeparator = document.createElement('li');
+    customSeparator.classList.add('separator');
+    customSeparator.textContent = '自定义主题';
+    ul.appendChild(customSeparator);
+
+    // 添加自定义主题列表
+    customThemes.forEach((i, index) => {
+        const li = document.createElement('li');
+        li.setAttribute('id', `customTheme${i.id}`);
+        const span1 = document.createElement('span');
+        span1.innerHTML = `${i.name}`;
+        span1.addEventListener('dblclick', () => showRenameInput(i.id, span1));
+        
+        const span2 = document.createElement('span');
+        span2.innerHTML = `<svg width="12" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#editIcon"></use></svg>`;
+        span2.addEventListener('click', () => showCssEditor(`${i.id}`));
+        
+        li.appendChild(span1);
+        li.appendChild(span2);
+        if (index === 0) {
+            li.classList.add('border-li');
+        }
+        ul.appendChild(li);
+    });
+}
+
+/**
+ * 渲染"创建新主题"按钮
+ * @param {HTMLElement} ul - 主题列表容器
+ */
+function renderCreateThemeButton(ul) {
+    const li = document.createElement('li');
+    li.setAttribute('id', 'create-theme');
+    li.classList.add('border-li');
+    const span1 = document.createElement('span');
+    span1.innerHTML = '创建新主题';
+    const span2 = document.createElement('span');
+    span2.style.display = 'flex';
+    span2.style.alignItems = 'center';
+    span2.innerHTML = `<svg width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#plusIcon"></use></svg>`;
+    span2.addEventListener('click', async () => {
+        const selectedThemeEl = document.querySelector('#gzhThemeSelector li.selected');
+        if (selectedThemeEl) {
+            const themeId = selectedThemeEl.id;
+            if (themeId.startsWith('customTheme')) {
+                const result = await invoke('plugin:sql|select', {
+                    db: 'sqlite:data.db',
+                    query: 'SELECT content FROM CustomTheme WHERE id = ?',
+                    values: [themeId.replace('customTheme', '')]
+                });
+                if (result && result.length > 0) {
+                    customThemeContent = result[0].content;
+                    showCssEditor();
+                }
+            } else {
+                try {
+                    const response = await fetch(`themes/${themeId}.css`);
+                    customThemeContent = await response.text();
+                    showCssEditor();
+                } catch (error) {
+                    console.error('Error loading theme:', error);
+                    await message('加载主题失败', { type: 'error' });
+                }
+            }
+        } else {
+            try {
+                const response = await fetch('themes/gzh_default.css');
+                customThemeContent = await response.text();
+                showCssEditor();
+            } catch (error) {
+                console.error('Error loading default theme:', error);
+                await message('加载默认主题失败', { type: 'error' });
+            }
+        }
+    });
+    li.appendChild(span1);
+    li.appendChild(span2);
+    ul.appendChild(li);
+}
+
+/**
+ * 渲染代码高亮主题列表
+ * @param {HTMLElement} ul - 主题列表容器
+ */
+function renderHighlightThemes(ul) {
+    const highlightSeparator = document.createElement('li');
+    highlightSeparator.classList.add('separator');
+    highlightSeparator.textContent = '代码高亮主题';
+    ul.appendChild(highlightSeparator);
+
+    highlightThemes.forEach((theme) => {
+        const li = document.createElement('li');
+        li.setAttribute('id', `highlight-${theme.id}`);
+        li.classList.add('highlight-theme');
+        const span1 = document.createElement('span');
+        span1.innerHTML = theme.name;
+        li.appendChild(span1);
+        ul.appendChild(li);
+    });
+}
+
+/**
+ * 设置主题选择器的事件监听器
+ * @param {HTMLElement} ul - 主题列表容器
+ */
+function setupThemeEventListeners(ul) {
+    const listItems = ul.querySelectorAll('li');
+    listItems.forEach((item) => {
+        item.addEventListener('click', function() {
+            if (item.classList.contains('highlight-theme')) {
+                const themeId = item.id.replace('highlight-', '');
+                changeHighlightTheme(themeId);
+                listItems.forEach((li) => {
+                    if (li.classList.contains('highlight-theme')) {
+                        li.classList.remove('selected');
+                    }
+                });
+                item.classList.add('selected');
+            } else if (!item.classList.contains('separator') && item.id !== 'create-theme') {
+                listItems.forEach((li) => {
+                    if (!li.classList.contains('highlight-theme')) {
+                        li.classList.remove('selected');
+                    }
+                });
+                item.classList.add('selected');
+                changeTheme(item.id);
+            }
+        });
+    });
+}
+
 async function loadCustomThemes() {
     const ul = document.getElementById('gzhThemeSelector');
     if (ul) {
         ul.innerHTML = '';
-        // 添加内置主题
-        builtinThemes.forEach((i) => {
-            const li = document.createElement('li');
-            li.setAttribute('id', i.id);
-            const span1 = document.createElement('span');
-            span1.innerHTML = i.name;
-            const span2 = document.createElement('span');
-            span2.innerHTML = i.author;
-            li.style.display = 'flex';
-            li.style.alignItems = 'center';
-            li.appendChild(span1);
-            li.appendChild(span2);
-            ul.appendChild(li);
-        });
+        
+        // 渲染内置主题
+        renderBuiltinThemes(ul);
 
         // 加载自定义主题
         const customThemes = await invoke('plugin:sql|select', {
@@ -721,106 +849,16 @@ async function loadCustomThemes() {
             values: []
         });
 
-        // 如果存在自定义主题，添加分隔符和主题列表
-        if (customThemes && customThemes.length > 0) {
-            // 添加自定义主题分隔符
-            const customSeparator = document.createElement('li');
-            customSeparator.classList.add('separator');
-            customSeparator.textContent = '自定义主题';
-            ul.appendChild(customSeparator);
+        // 渲染自定义主题
+        renderCustomThemes(ul, customThemes);
 
-            // 添加自定义主题列表
-            customThemes.forEach((i, index) => {
-                const li = document.createElement('li');
-                li.setAttribute('id', `customTheme${i.id}`);
-                const span1 = document.createElement('span');
-                span1.innerHTML = `${i.name}`;
-                span1.addEventListener('dblclick', () => showRenameInput(i.id, span1));
-                
-                const span2 = document.createElement('span');
-                span2.innerHTML = `<svg width="12" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#editIcon"></use></svg>`;
-                span2.addEventListener('click', () => showCssEditor(`${i.id}`));
-                
-                li.appendChild(span1);
-                li.appendChild(span2);
-                if (index === 0) {
-                    li.classList.add('border-li');
-                }
-                ul.appendChild(li);
-            });
+        // 添加"创建新主题"按钮（如果自定义主题数量小于10）
+        if (!customThemes || customThemes.length < 10) {
+            renderCreateThemeButton(ul);
         }
 
-        // 添加"创建新主题"按钮（如果自定义主题数量小于3）
-        if (customThemes && customThemes.length < 10) {
-            const li = document.createElement('li');
-            li.setAttribute('id', 'create-theme');
-            li.classList.add('border-li');
-            const span1 = document.createElement('span');
-            span1.innerHTML = '创建新主题';
-            const span2 = document.createElement('span');
-            span2.style.display = 'flex';
-            span2.style.alignItems = 'center';
-            span2.innerHTML = `<svg width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#plusIcon"></use></svg>`;
-            span2.addEventListener('click', async () => {
-                // 获取当前选中的主题内容作为新主题的初始内容
-                const selectedTheme = document.querySelector('#gzhThemeSelector li.selected');
-                if (selectedTheme) {
-                    const themeId = selectedTheme.id;
-                    if (themeId.startsWith('customTheme')) {
-                        // 如果选中的是自定义主题，获取其内容
-                        const result = await invoke('plugin:sql|select', {
-                            db: 'sqlite:data.db',
-                            query: 'SELECT content FROM CustomTheme WHERE id = ?',
-                            values: [themeId.replace('customTheme', '')]
-                        });
-                        if (result && result.length > 0) {
-                            customThemeContent = result[0].content;
-                            showCssEditor();
-                        }
-                    } else {
-                        // 如果选中的是内置主题，获取其内容
-                        try {
-                            const response = await fetch(`themes/${themeId}.css`);
-                            customThemeContent = await response.text();
-                            showCssEditor();
-                        } catch (error) {
-                            console.error('Error loading theme:', error);
-                            await message('加载主题失败', { type: 'error' });
-                        }
-                    }
-                } else {
-                    // 如果没有选中的主题，使用默认主题内容
-                    try {
-                        const response = await fetch('themes/gzh_default.css');
-                        customThemeContent = await response.text();
-                        showCssEditor();
-                    } catch (error) {
-                        console.error('Error loading default theme:', error);
-                        await message('加载默认主题失败', { type: 'error' });
-                    }
-                }
-            });
-            li.appendChild(span1);
-            li.appendChild(span2);
-            ul.appendChild(li);
-        }
-
-        // 添加代码高亮主题分隔符
-        const highlightSeparator = document.createElement('li');
-        highlightSeparator.classList.add('separator');
-        highlightSeparator.textContent = '代码高亮主题';
-        ul.appendChild(highlightSeparator);
-
-        // 添加代码高亮主题
-        highlightThemes.forEach((theme) => {
-            const li = document.createElement('li');
-            li.setAttribute('id', `highlight-${theme.id}`);
-            li.classList.add('highlight-theme');
-            const span1 = document.createElement('span');
-            span1.innerHTML = theme.name;
-            li.appendChild(span1);
-            ul.appendChild(li);
-        });
+        // 渲染代码高亮主题
+        renderHighlightThemes(ul);
 
         // 设置主题选择器的高度
         if (customThemes && customThemes.length > 0) {
@@ -830,29 +868,8 @@ async function loadCustomThemes() {
             document.getElementById('themeOverlay').removeAttribute("style");
         }
 
-        const listItems = ul.querySelectorAll('li');
-        listItems.forEach((item) => {
-            item.addEventListener('click', function() {
-                if (item.classList.contains('highlight-theme')) {
-                    const themeId = item.id.replace('highlight-', '');
-                    changeHighlightTheme(themeId);
-                    listItems.forEach((li) => {
-                        if (li.classList.contains('highlight-theme')) {
-                            li.classList.remove('selected');
-                        }
-                    });
-                    item.classList.add('selected');
-                } else if (!item.classList.contains('separator') && item.id !== 'create-theme') {
-                    listItems.forEach((li) => {
-                        if (!li.classList.contains('highlight-theme')) {
-                            li.classList.remove('selected');
-                        }
-                    });
-                    item.classList.add('selected');
-                    changeTheme(item.id);
-                }
-            });
-        });
+        // 设置事件监听器
+        setupThemeEventListeners(ul);
     }
 }
 
