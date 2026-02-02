@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.5.3] - 2026-02-03 (缩进和字体修复版本)
+
+### 🐛 Bug Fixes
+- **代码块缩进修复**: 修复微信公众号代码块缩进丢失问题，使用 `&nbsp;` 替代 Em Space (`\u2003`)
+- **字体显示修复**: 恢复 JetBrains Mono 字体样式（v2.4.6 误删除的 `<style>` 标签）
+
+### 📝 Technical Details
+- 修改 `src/right.js` 中 `processCodeBlocks` 和 `processInlineCode` 函数
+- 在 `src/markdown_preview.html` 中添加字体样式标签
+- 微信公众号代码缩进和字体显示正常
+
+### 🔍 问题根源
+- **缩进问题**: Em Space (`\u2003`) 在微信公众号中转换为 `&nbsp;` 后渲染失败
+- **字体问题**: commit `c3f894b` (v2.4.6) 误删除了 `<style>` 标签，影响 v2.4.6 至 v2.5.2
+
+---
+
 ## [2.5.2] - 2025-01-22 (代码质量优化版本)
 
 ### 🔧 代码重构
