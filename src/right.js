@@ -334,8 +334,9 @@ function processInlineCode(clonedWenyan) {
         code.style.lineHeight = '1.5';
 
         // 处理行内空格
+        // 修复：使用 &nbsp; 替代 \u2003，提升微信公众号兼容性
         code.innerHTML = code.innerHTML.replace(/ {2,}/g, (match) => {
-            return '\u2003'.repeat(match.length);
+            return '&nbsp;'.repeat(match.length);
         });
 
         // 如果是列表项中的行内代码，特殊处理
@@ -409,12 +410,13 @@ function processCodeBlocks(clonedWenyan, highlightCss) {
             code.style.padding = '0';
 
             // 处理换行和缩进
+            // 修复：使用 &nbsp; 替代 \u2003 (Em Space)，提升微信公众号兼容性
             const lines = code.innerHTML.split('\n');
             const processedLines = lines.map(line => {
                 return line.replace(/^( +)/g, (match) => {
-                    return '\u2003'.repeat(match.length);
+                    return '&nbsp;'.repeat(match.length);
                 }).replace(/ {2,}/g, (match) => {
-                    return '\u2003'.repeat(match.length);
+                    return '&nbsp;'.repeat(match.length);
                 });
             });
 
