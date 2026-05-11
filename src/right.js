@@ -372,6 +372,27 @@ function processStrongText(clonedWenyan) {
     });
 }
 
+// 辅助函数：保留代码块中的空格和换行，同时避免误伤HTML标签属性
+function preserveCodeBlockWhitespace(html) {
+    const processedHtml = html.split(/(<[^>]+>)/g).map(segment => {
+        if (!segment || segment.startsWith('<')) {
+            return segment;
+        }
+
+        return segment
+            .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+            .replace(/ /g, '&nbsp;')
+            .replace(/\r\n|\r|\n/g, '<br>');
+    }).join('');
+
+    return processedHtml
+        .replace(/(<br>)((?:&nbsp;)+)(<span\b[^>]*>)/g, '$1$3$2')
+        .replace(/^((?:&nbsp;)+)(<span\b[^>]*>)/, '$2$1')
+        .replace(/(<span\b[^>]*>[^<]*?)<\/span>((?:&nbsp;)+)(<span\b[^>]*>)/g, '$1$2</span>$3')
+        .replace(/(<span\b[^>]*>[^<]*?)<\/span>((?:&nbsp;)+)(<br>)/g, '$1$2</span>$3')
+        .replace(/(<span\b[^>]*>[^<]*?)<\/span>((?:&nbsp;)+)([^<])/g, '$1$2</span>$3');
+}
+
 // 辅助函数：处理代码块
 function processCodeBlocks(clonedWenyan, highlightCss) {
     const elements = clonedWenyan.querySelectorAll("pre");
@@ -409,18 +430,8 @@ function processCodeBlocks(clonedWenyan, highlightCss) {
             code.style.border = 'none';
             code.style.padding = '0';
 
-            // 处理换行和缩进
-            // 修复：使用 &nbsp; 替代 \u2003 (Em Space)，提升微信公众号兼容性
-            const lines = code.innerHTML.split('\n');
-            const processedLines = lines.map(line => {
-                return line.replace(/^( +)/g, (match) => {
-                    return '&nbsp;'.repeat(match.length);
-                }).replace(/ {2,}/g, (match) => {
-                    return '&nbsp;'.repeat(match.length);
-                });
-            });
-
-            code.innerHTML = processedLines.join('<br>');
+            // 处理换行和缩进：仅转换文本片段，保留 highlight.js 的 HTML 标签结构
+            code.innerHTML = preserveCodeBlockWhitespace(code.innerHTML);
         }
     });
 }
